@@ -1,9 +1,14 @@
 require('./config/config'); // Trae la configuración establecida primero
 
+
 const express = require('express');
+const moongoose = require('mongoose'); // Paquete para establecer conexión con la base de datos mongoDb
+
 const app = express();
 const bodyParser = require('body-parser'); // para manejar los cuerpos de servicios REST (middlewares, cada petición pasa por las dos lineas de abajo)
  
+app.use( require('./routes/usuario') ); // importamos y usamos las rutas del usuario en app
+
 //#region Configuraciones del parser middleware
 
   // Cada petición que se haga por express pasa por esas lineas de bodyParser)
@@ -12,59 +17,25 @@ const bodyParser = require('body-parser'); // para manejar los cuerpos de servic
   app.use(bodyParser.urlencoded({ extended: false }));
   
   // parse application/json
-  app.use(bodyParser.json())
+  app.use(bodyParser.json());
 
 //#endregion
 
-//#region Peticiones Get, Post, Put y Delete
 
-  app.get('/usuario', function (req, res) {
-    res.json('get usuario');
-  });
+// Abrir conexión con la BD
+moongoose.connect( 'mongodb://localhost:27017/cafe', //conexión y su url a la base de datos
+                  {useNewUrlParser: true,useUnifiedTopology: true,useCreateIndex:true}, // configuraciones extras sobre una actualizacion de mongo 
+                  (err, res) =>{  // callback por si hay una conexión válida o no
 
+                      if( err ){ 
+                        throw err;
+                      }
 
-  app.post('/usuario', function (req, res) {
-    
-    let body = req.body;
-
-    // Si no viene un nombre, quiero mostrar un bad request
-    if( body.nombre === undefined ) {
-
-      res.status(400).json({
-
-        ok: false,
-        mensaje: 'El nombre es necesario',
-
-      });
-
-    } else {
-      
-      res.json({
-        body
-      });
-
-    }
-
-  });
+                      console.log('Base de datos ONLINE');
+                      
 
 
-  app.put('/usuario/:id', function (req, res) {
-
-    let id = req.params.id;
-
-    res.json({
-
-      id
-
-    });
-
-  });
-
-  app.delete('/usuario', function (req, res) { // No se acostumbra a borrar, sino cambiar el estado del registro para que no esté disponible
-    res.json('delete usuario');
-  });
-
-//#endregion
+                    } ); 
 
 app.listen( process.env.PORT , () => {
 
