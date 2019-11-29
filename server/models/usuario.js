@@ -1,9 +1,6 @@
 const mongoose = require('mongoose');
 const uniqueValidator = require('mongoose-unique-validator'); // npm install --save mongoose-unique-validator (mas user friendly)
 
-
-// Nota: para encriptar la contraseña de forma segura con una función hash, se utilza "npm i bcrypt"
-
 let rolesValidos = {
 
   values: ['ADMIN_ROLE', 'USER_ROLE']  ,
@@ -61,6 +58,18 @@ let usuarioSchema = new Schema({
     }
 
 });
+
+// Una forma mejor para esconder la contraseña para mostrarla al hacer post o get
+usuarioSchema.methods.toJSON =  function() { // toJSON siempre se llama (no se usa función flecha porque requerimos el "this")
+
+    let user = this;
+    let userObject = user.toObject();
+    
+    delete userObject.password; // luego de convertirlo a objeto el JSON, ahora si puede quitarse el campo de password
+
+    return userObject;
+
+}; 
 
 // para indicar que el schema usa un plugin personalizado (Con un mensaje personalizado)
 usuarioSchema.plugin( uniqueValidator, { message: '{PATH} debe ser único' } ); 
