@@ -1,4 +1,15 @@
 const mongoose = require('mongoose');
+const uniqueValidator = require('mongoose-unique-validator'); // npm install --save mongoose-unique-validator (mas user friendly)
+
+
+// Nota: para encriptar la contraseña de forma segura con una función hash, se utilza "npm i bcrypt"
+
+let rolesValidos = {
+
+  values: ['ADMIN_ROLE', 'USER_ROLE']  ,
+  message: '{VALUE} no es un rol válido'
+
+};
 
 // Definir y crear un nuevo esquema de usuario con los campos que tendrá la colección y restricciones
 let Schema = mongoose.Schema;
@@ -12,6 +23,7 @@ let usuarioSchema = new Schema({
 
     email: {
         type: String,
+        unique: true, // Para que la información sea única en todos los datos (esta propiedad puede instalarse con npm install --save mongoose-unique-validator)
         required: [true, 'El correo es necesario']
     },
 
@@ -29,8 +41,9 @@ let usuarioSchema = new Schema({
 
     role: {
 
-        default: 'USER_ROLE'
-
+        type: String,
+        default: 'USER_ROLE',
+        enum: rolesValidos  // Validación adicional para que entre en valores correctos (y no sea un rol cualquiera). Fueron señalados más arriba los roles válidos
     },
     
     estado: {
@@ -49,7 +62,8 @@ let usuarioSchema = new Schema({
 
 });
 
+// para indicar que el schema usa un plugin personalizado (Con un mensaje personalizado)
+usuarioSchema.plugin( uniqueValidator, { message: '{PATH} debe ser único' } ); 
 
 // Se exporta el modelo para su uso en la BD
-
 module.exports = mongoose.model( 'Usuario', usuarioSchema ); // Nombre del modelo y valores del mismo (schema)

@@ -7,20 +7,20 @@ const moongoose = require('mongoose'); // Paquete para establecer conexión con 
 const app = express();
 const bodyParser = require('body-parser'); // para manejar los cuerpos de servicios REST (middlewares, cada petición pasa por las dos lineas de abajo)
  
-app.use( require('./routes/usuario') ); // importamos y usamos las rutas del usuario en app
 
 //#region Configuraciones del parser middleware
 
-  // Cada petición que se haga por express pasa por esas lineas de bodyParser)
+// Cada petición que se haga por express pasa por esas lineas de bodyParser)
 
-  // parse application/x-www-form-urlencoded
-  app.use(bodyParser.urlencoded({ extended: false }));
-  
-  // parse application/json
-  app.use(bodyParser.json());
+// parse application/x-www-form-urlencoded
+app.use(bodyParser.urlencoded({ extended: false }));
+
+// parse application/json
+app.use(bodyParser.json());
 
 //#endregion
 
+app.use( require('./routes/usuario') ); // importamos y usamos las rutas del usuario en app (luego de la configuración de los middleware)
 
 // Abrir conexión con la BD
 moongoose.connect( 'mongodb://localhost:27017/cafe', //conexión y su url a la base de datos
@@ -28,7 +28,7 @@ moongoose.connect( 'mongodb://localhost:27017/cafe', //conexión y su url a la b
                   (err, res) =>{  // callback por si hay una conexión válida o no
 
                       if( err ){ 
-                        throw err;
+                        throw 'err';
                       }
 
                       console.log('Base de datos ONLINE');

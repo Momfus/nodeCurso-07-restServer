@@ -1,5 +1,6 @@
 
 const express = require('express');
+const Usuario = require('../models/usuario');
 
 const app = express();
 
@@ -14,23 +15,37 @@ app.post('/usuario', function (req, res) {
 
     let body = req.body;
 
-    // Si no viene un nombre, quiero mostrar un bad request
-    if( body.nombre === undefined ) {
 
-        res.status(400).json({
+    let usuario = new Usuario({
 
-        ok: false,
-        mensaje: 'El nombre es necesario',
+        nombre: body.nombre,
+        email: body.email,
+        password: body.password,
+        role: body.role
 
-        });
+    });
 
-    } else {
-        
+    // Grabarlo en la BD
+    usuario.save( (err, usuarioDB) => {
+
+        // Si hay algun error, mostrar el problema sino seguir normalmente
+        if( err ) {
+            return res.status(400).json({ // debe devolverse así no sigue con el resto del código (sino causa error por enviar dos respuestas)
+                            ok: false,
+                            err
+                        });
+        }
+
         res.json({
-        body
+
+            ok: true,
+            usuario: usuarioDB
+
         });
 
-    }
+    });
+
+
 
 });
 
