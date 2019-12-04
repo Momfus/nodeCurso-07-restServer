@@ -18,8 +18,8 @@ app.get('/usuario', function (req, res) {
     let limite = req.query.limite || 5; // Traer el parámetro o simplemente 5
     limite = Number(limite);
 
-    // Regresar todos los usuarios de la DB con condiciones
-    Usuario.find({  }, 'nombre email role estado google img') // Primer argumento es condiciones y el segundo los campos que queremos ver (el id siempre va a estar)
+    // Regresar todos los usuarios de la DB con condiciones (solo aquellos con estado "true", es decir, sin borrado lógico)
+    Usuario.find( { estado: true }, 'nombre email role estado google img') // Primer argumento es condiciones y el segundo los campos que queremos ver (el id siempre va a estar)
             .skip(desde) // se salta los primeros 5
             .limit(limite) // trae los siguientes 5 luego del salto
             .exec( (err, usuarios) => {
@@ -32,7 +32,7 @@ app.get('/usuario', function (req, res) {
                                 });
                 }
 
-                Usuario.countDocuments ({}, (err, conteo) => { // Retornar el número de registros de la colección usuario.
+                Usuario.countDocuments ( { estado: true }, (err, conteo) => { // Retornar el número de registros de la colección usuario.
             
                     res.json({
             
@@ -127,8 +127,83 @@ app.put('/usuario/:id', function (req, res) {
 
 });
 
-app.delete('/usuario', function (req, res) { 
-    res.json('delete usuario');
+app.delete('/usuario/:id', function (req, res) { 
+    
+    let id = req.params.id; // obtenido del url
+
+    //#region  Borrado lógico (recomendado)
+        let cambiaEstado = {
+            estado: false
+        };
+
+        Usuario.findByIdAndUpdate( id, cambiaEstado, { new: true }, ( err, usuarioBorrado ) => {
+
+            // Si hay algun error, mostrar el problema sino seguir normalmente
+            if( err ) {
+                return res.status(400).json({ // debe devolverse así no sigue con el resto del código (sino causa error por enviar dos respuestas)
+                                ok: false,
+                                err
+                            });
+            }
+
+            if( !usuarioBorrado.estado ) {
+
+                return res.status(400).json({
+                    ok: false,
+                    err: {
+                        message: 'Usuario no encontrado'
+                    }
+                });
+
+            }
+
+            res.json({
+
+                ok:true,
+                usuario: usuarioBorrado
+
+            });
+
+        });
+
+    //#endregion
+
+    //#region Delete físico
+    /*
+        // Borrar el registro fisicamente (no recomendado pero una manera de hacerlo)
+        Usuario.findByIdAndRemove( id, (err, usuarioBorrado) => {
+
+            // Si hay algun error, mostrar el problema sino seguir normalmente
+            if( err ) {
+                return res.status(400).json({ // debe devolverse así no sigue con el resto del código (sino causa error por enviar dos respuestas)
+                                ok: false,
+                                err
+                            });
+            }
+
+            // Validación si es null
+            if( !usuarioBorrado ) {
+                return res.status(400).json({
+                    ok: false,
+                    err: {
+                        message: 'Usuario no encontrado'
+                    }
+                });
+            }
+
+            // Si se borra
+            res.json({
+
+                ok: true,
+                usuario: usuarioBorrado
+
+            });
+
+        });
+    */
+    //#endregion
+    
+
 });
 
 
