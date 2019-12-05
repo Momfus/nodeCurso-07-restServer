@@ -1,9 +1,9 @@
 
 const express = require('express');
-const Usuario = require('../models/usuario');
-
 const bcrypt = require('bcrypt'); //: para encriptar la contraseña de forma segura con una función hash, se utilza "npm i bcrypt"
 const _ = require('underscore'); // La libreria underscore agrega mas de 100 funcionalidades a javascript que son muy útiles y agilizan el trabajo como "pickl" que devuelve una copia de un objeto con los campos que quiero (se le suele colocar de nombre _ por convención)
+
+const Usuario = require('../models/usuario');
 
 const app = express();
 

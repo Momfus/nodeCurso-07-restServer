@@ -16,6 +16,20 @@ process.env.PORT = process.env.PORT || 3000; // Variable global que defino y tom
 process.env.NODE_ENV = process.env.NODE_ENV || 'dev'; // Si la base de datos no existe, suponemos que estamos en desarrollo
 
 // ========================================
+// Vencimiento del token
+// ========================================
+// 60 segundos 
+// 60 minutos
+// 24 horas
+// 30 días
+process.env.CADUCIDAD_TOKEN = 60 * 60 * 24 *30;
+
+// ========================================
+// SEED (semilla de autentificación)
+// ========================================
+process.env.SEED = process.env.SEED || 'este-es-el-seed-desarrollo'; // usar la variable de heroku si esta en producción sino usar el string como semilla de desarrollo
+
+// ========================================
 // Base de datos
 // ========================================
 let urlDB;

@@ -10,17 +10,18 @@ const bodyParser = require('body-parser'); // para manejar los cuerpos de servic
 
 //#region Configuraciones del parser middleware
 
-// Cada petición que se haga por express pasa por esas lineas de bodyParser)
+  // Cada petición que se haga por express pasa por esas lineas de bodyParser)
 
-// parse application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({ extended: false }));
+  // parse application/x-www-form-urlencoded
+  app.use(bodyParser.urlencoded({ extended: false }));
 
-// parse application/json
-app.use(bodyParser.json());
+  // parse application/json
+  app.use(bodyParser.json());
 
 //#endregion
 
-app.use( require('./routes/usuario') ); // importamos y usamos las rutas del usuario en app (luego de la configuración de los middleware)
+// Configuración global de rutas
+app.use( require('./routes/index') ); 
 
 // Abrir conexión con la BD
 moongoose.connect( process.env.URLDB, //conexión y su url a la base de datos (ver archivo config)
