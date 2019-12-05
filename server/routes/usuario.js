@@ -4,12 +4,13 @@ const bcrypt = require('bcrypt'); //: para encriptar la contraseña de forma seg
 const _ = require('underscore'); // La libreria underscore agrega mas de 100 funcionalidades a javascript que son muy útiles y agilizan el trabajo como "pickl" que devuelve una copia de un objeto con los campos que quiero (se le suele colocar de nombre _ por convención)
 
 const Usuario = require('../models/usuario');
+const { verificaToken } = require('../middlewares/autenticacion'); // obtengo la función directamente con la destructuración (sino se puede llevar todo del archivo)
 
 const app = express();
 
 
 
-app.get('/usuario', function (req, res) {
+app.get('/usuario', verificaToken , (req, res) => { // El segundo argumento son los middlewares (en este caso usaremos unos personalizado para la autentificación) Siempre se dispara al llamar esa función
     
 
     let desde = req.query.desde || 0; // Usar el parámetro recibido, sino desde el principio de la lista
