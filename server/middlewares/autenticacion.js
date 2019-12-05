@@ -18,7 +18,9 @@ let verificaToken = ( req, res, next ) => { // Next continuaría la continuació
             return res.status(401).json({ // status de no autorizado
 
                 ok:false,
-                err
+                err: {
+                    message: 'Token no válido'
+                }
 
             });
         }
@@ -29,16 +31,43 @@ let verificaToken = ( req, res, next ) => { // Next continuaría la continuació
         next(); // Sigue con lo que venia de la función que lo usa
     
     });
+};
 
+// =======================
+// Verificar AdminRole
+// =======================
 
-    
+// Tarea: un middleware que haga que solo los que son ADMIN_ROLE puedan usar el servicio que lo usa
+let verificaAdmin_Role = (req, res, next ) => {
 
+    let usuario = req.usuario;
+
+    if( usuario.role === 'ADMIN_ROLE' ) {
+
+        next();
+
+    } else {
+
+        // Manejo de error
+        res.json({
+
+            ok: false,
+            err: {
+                message: 'El usuario no es administrador'
+            }
+
+        });
+
+        // No se llama al next porque no se desea continuar el código de haber error y no tener acceso
+
+    }
 
 };
 
 
 module.exports = {
 
-    verificaToken
+    verificaToken,
+    verificaAdmin_Role
 
 };

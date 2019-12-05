@@ -4,7 +4,7 @@ const bcrypt = require('bcrypt'); //: para encriptar la contraseña de forma seg
 const _ = require('underscore'); // La libreria underscore agrega mas de 100 funcionalidades a javascript que son muy útiles y agilizan el trabajo como "pickl" que devuelve una copia de un objeto con los campos que quiero (se le suele colocar de nombre _ por convención)
 
 const Usuario = require('../models/usuario');
-const { verificaToken } = require('../middlewares/autenticacion'); // obtengo la función directamente con la destructuración (sino se puede llevar todo del archivo)
+const { verificaToken, verificaAdmin_Role } = require('../middlewares/autenticacion'); // obtengo la función directamente con la destructuración (sino se puede llevar todo del archivo)
 
 const app = express();
 
@@ -50,7 +50,7 @@ app.get('/usuario', verificaToken , (req, res) => { // El segundo argumento son 
 });
 
 
-app.post('/usuario', function (req, res) {
+app.post('/usuario', [verificaToken, verificaAdmin_Role], function (req, res) {
 
     let body = req.body;
 
@@ -91,7 +91,7 @@ app.post('/usuario', function (req, res) {
 });
 
 
-app.put('/usuario/:id', function (req, res) {
+app.put('/usuario/:id', [verificaToken, verificaAdmin_Role], function (req, res) {
 
     let id = req.params.id;
     // let body = req.body;
@@ -128,42 +128,47 @@ app.put('/usuario/:id', function (req, res) {
 
 });
 
-app.delete('/usuario/:id', function (req, res) { 
+app.delete('/usuario/:id', [verificaToken, verificaAdmin_Role], function (req, res) { 
     
     let id = req.params.id; // obtenido del url
 
-    //#region  Borrado lógico (recomendado)
+        //#region  Borrado lógico (recomendado)
         let cambiaEstado = {
             estado: false
         };
 
-        Usuario.findByIdAndUpdate( id, cambiaEstado, { new: true }, ( err, usuarioBorrado ) => {
+
+        Usuario.findByIdAndUpdate( id, cambiaEstado, { new: false }, ( err, usuarioBorrado )  => {
+
+            // Nota--> new:false hace que se devuelva el objeto original al llamar la función luego (si coloco true, me devolveria usuarioBorrado ya estando modificado)
 
             // Si hay algun error, mostrar el problema sino seguir normalmente
             if( err ) {
                 return res.status(400).json({ // debe devolverse así no sigue con el resto del código (sino causa error por enviar dos respuestas)
                                 ok: false,
-                                err
+                                err: {
+                                    message: 'Usuario no encontrado'
+                                }
                             });
             }
-
+            
             if( !usuarioBorrado.estado ) {
 
                 return res.status(400).json({
                     ok: false,
                     err: {
-                        message: 'Usuario no encontrado'
+                        message: 'Usuario encontdado pero con borrado lógico'
                     }
                 });
 
-            }
+            } 
 
-            res.json({
+                res.json({
 
-                ok:true,
-                usuario: usuarioBorrado
+                    ok:true,
+                    message: 'Borrado lógico realizado con éxito'
 
-            });
+                });
 
         });
 
