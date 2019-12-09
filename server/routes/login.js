@@ -91,22 +91,129 @@ async function verify( token ) {
     console.log(payload.picture);
     */
 
+    return {
+
+        nombre: payload.name,
+        email: payload.email,
+        img: payload.picture,
+        google: true
+
+    };
+
 }
 
 // Ruta de identificación para obtener token de loguearse con google
-app.post('/google', ( req, res ) => {
+app.post('/google', async ( req, res ) => {
+    
+    // Para validar el token en node.js se usa el paquete: npm install google-auth-library --save
 
     let token = req.body.idtoken;
     
-    verify( token );
+    let googleUser = await verify( token ) // para obtener el resultado debo usar await y ser llamado de una función async
+                    .catch( e => {
+                        return res.status(403).json({ // Devolver error si ocurre algun problema
+                            ok: false,
+                            err: e
+                        });
+                    });
 
-    res.json({
+    // Para mostar la información obtenida antes
+    // res.json({
+    //     usuario: googleUser
+    // });
 
-        token
+    // Para obtener el usuario que corresponde al obtenido por el login de google (y manejo de error)
+    Usuario.findOne( { email: googleUser.email }, (err, usuarioDB) => {
+
+        // Si hay error con la conexion con el servidor
+        if( err ) {
+            return res.status(500).json({ 
+                            ok: false,
+                            err
+                        });
+        }
+
+        // verificar si el usuario buscaod existe y comprobar si la autentificación fue por la de google (en caso de no haberlo hecho asi, se manda un error 400)
+        if( usuarioDB ) {
+
+            //#region Si el usuario ya existe en la base de datos
+
+                // Si no se ha identificado con google previamente
+                if( usuarioDB.google === false ) {
+
+                    if( err ) {
+                        return res.status(500).json({ 
+                            ok: false,
+                            err: {
+                                message: 'Debe de usar su atenticación normal'
+                            }
+                        });
+                    }
+
+                } else {
+
+                    // Si se ha autenticado previamente con google login, se actualiza el token
+                    let token = jwt.sign({
+                        usuario: usuarioDB //el payload (data)
+                    }, process.env.SEED
+                    , { expiresIn: process.env.CADUCIDAD_TOKEN }); // Expira en segundos * minutos * horas * dias (un mes en este caso)
+            
+                    return res.json({
+                        
+                        ok: true,
+                        usuario: usuarioDB,
+                        token
+
+                    });
+
+                }
+
+            //#endregion
+
+        } else {
+
+            //#region Si el usuario no existe en la base de datos se crea
+            
+                let usuario = new Usuario();
+
+                usuario.nombre = googleUser.nombre;
+                usuario.email = googleUser.email;
+                usuario.img = googleUser.img;
+                usuario.google = true;
+                usuario.password = ':)'; // la gente no podra autenticarse con esto porque se encripta (puede ser cualquier cosa) porque es obligatorio tenerlo, esto no importa porque el pass lo maneja google login
+            
+                usuario.save( (err, usuarioDB)  => {
+
+                    // Si hay error con la conexion con el servidor
+                    if( err ) {
+                        return res.status(500).json({ 
+                                        ok: false,
+                                        err
+                                    });
+                    }
+
+                    // Si se ha autenticado previamente con google login, se actualiza el token
+                    let token = jwt.sign({
+                        usuario: usuarioDB //el payload (data)
+                    }, process.env.SEED
+                    , { expiresIn: process.env.CADUCIDAD_TOKEN }); // Expira en segundos * minutos * horas * dias (un mes en este caso)
+            
+                    return res.json({
+
+                        ok: true,
+                        usuario: usuarioDB,
+                        token
+
+                    });
+
+                });
+
+            //#endregion
+
+        }
 
     });
 
-    // Para validar el token en node.js se usa el paquete: npm install google-auth-library --save
 
 });
 
