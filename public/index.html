@@ -44,6 +44,8 @@
             // Lo siguiente es para no obtener el ID plano sino usar un token (más seguro) - Se puede ver la explicación aqui: https://developers.google.com/identity/sign-in/web/backend-auth
             var id_token = googleUser.getAuthResponse().id_token;
 
+            // console.log(id_token)
+
             var xhr = new XMLHttpRequest();
             xhr.open('POST', '/google'); // El segundo parámetro es el url donde se manda que al ser en un server local, lo configuramos en login.js la ruta
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
