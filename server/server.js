@@ -4,6 +4,8 @@ require('./config/config'); // Trae la configuración establecida primero
 const express = require('express');
 const moongoose = require('mongoose'); // Paquete para establecer conexión con la base de datos mongoDb
 
+const path = require('path'); // Paquete que trae node por defecto que permite colocar los path de carpetas de forma correcta (con __dirname)
+
 const app = express();
 const bodyParser = require('body-parser'); // para manejar los cuerpos de servicios REST (middlewares, cada petición pasa por las dos lineas de abajo)
  
@@ -19,6 +21,11 @@ const bodyParser = require('body-parser'); // para manejar los cuerpos de servic
   app.use(bodyParser.json());
 
 //#endregion
+
+// Habilitare que la carpeta public pueda accederse
+app.use( express.static( path.resolve(__dirname, '../public') ) );
+// console.log( path.resolve(__dirname, '../public') ); // Para ver como lo arma path.resolve
+
 
 // Configuración global de rutas
 app.use( require('./routes/index') ); 

@@ -44,4 +44,9 @@ if ( process.env.NODE_ENV === 'dev' ) {
 
 }
 
+// ========================================
+// Google ClIENT ID
+// ========================================
+process.env.CLIENT_ID = process.env.CLIENT_ID || '615848462117-9uhe5597f6qnbommk2gsobc5nv7ss1t7.apps.googleusercontent.com'; // El segundo lo saco del panel de developer de google con el API
+
 process.env.URLDB = urlDB;

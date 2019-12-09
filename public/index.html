@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Google Sign-In Demo</title>
+
+    <!-- Traer la libreria de signin de google como se explica aquí: https://developers.google.com/identity/sign-in/web/sign-in -->
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta name="google-signin-client_id" content="615848462117-9uhe5597f6qnbommk2gsobc5nv7ss1t7.apps.googleusercontent.com">
+
+</head>
+<body>
+    
+    <!-- Botón de google para loguearse -->
+    <div class="g-signin2" data-onsuccess="onSignIn"></div>
+
+    <!-- Para salir -->
+    <a href="#" onclick="signOut();">Sign out</a>
+
+ 
+    <!-- En vez de un archivo js, se coloca nomás para probar -->
+    <script>
+        function signOut() {
+            var auth2 = gapi.auth2.getAuthInstance();
+            auth2.signOut().then(function () {
+            console.log('User signed out.');
+            });
+        }
+    </script>
+
+    <script>
+    
+        function onSignIn(googleUser) {
+            var profile = googleUser.getBasicProfile();
+            console.log('ID: ' + profile.getId()); // Do not send to your backend! Use an ID token instead.
+            console.log('Name: ' + profile.getName());
+            console.log('Image URL: ' + profile.getImageUrl());
+            console.log('Email: ' + profile.getEmail()); // This is null if the 'email' scope is not present.
+
+
+            // Lo siguiente es para no obtener el ID plano sino usar un token (más seguro) - Se puede ver la explicación aqui: https://developers.google.com/identity/sign-in/web/backend-auth
+            var id_token = googleUser.getAuthResponse().id_token;
+
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', '/google'); // El segundo parámetro es el url donde se manda que al ser en un server local, lo configuramos en login.js la ruta
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onload = function() {
+            console.log('Signed in as: ' + xhr.responseText);
+            };
+            xhr.send('idtoken=' + id_token);
+        }
+    
+    </script>
+
+</body>
+</html>
