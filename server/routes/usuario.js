@@ -163,12 +163,12 @@ app.delete('/usuario/:id', [verificaToken, verificaAdmin_Role], function (req, r
 
             } 
 
-                res.json({
+            res.json({
 
-                    ok:true,
-                    message: 'Borrado lógico realizado con éxito'
+                ok:true,
+                message: 'Borrado lógico realizado con éxito'
 
-                });
+            });
 
         });
 
