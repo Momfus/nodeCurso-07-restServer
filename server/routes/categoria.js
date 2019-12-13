@@ -12,6 +12,8 @@ app.get('/categoria', verificaToken, (req, res) => {
 
     // NOTA: Recordar que se hace borrado físico, no lógico, asi que no hace falta poner un estado en sus atributos
     Categoria.find( {} ) // No hay una condición de búsqueda así que el objeto es vacio
+                .populate('usuario', 'nombre email') // Trae la información del id señalado como "usuario"  en el json (el segundo parámetro indico los atributos que me interesan, si no lo coloco trae todos / el password desde el modelo de usuario no dejamos que se muestre)
+                .sort('descripcion') // ordenar alfabeticamente según el parámetro descripción
                 .exec( (err, categorias) => {
 
                     // Si hay algun error, mostrar el problema sino seguir normalmente
@@ -88,7 +90,7 @@ app.post('/categoria', verificaToken, (req, res) => {
     // req.usuario._id
 
     let body = req.body;
-    console.log(req);
+    
     let categoria =  new Categoria({
 
         descripcion: body.descripcion,
@@ -102,8 +104,8 @@ app.post('/categoria', verificaToken, (req, res) => {
     categoria.save( (err, categoriaDB) => {
 
         
+        // Error de conexión
 
-        // Error ce conexión
         if( err ) {
             return res.status(500).json({ 
                             ok: false,
