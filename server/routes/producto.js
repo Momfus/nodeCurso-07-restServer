@@ -154,6 +154,37 @@ app.get('/producto/:id', verificaToken, (req, res) => {
 });
 
 // =============================
+// Buscar productos
+// =============================
+app.get('/producto/buscar/:termino', verificaToken, (req, res) => {
+
+    let termino = req.params.termino;
+
+    // Usamos una expresion regular para hacer la búsqueda más flexible y que no sea tal cual se escribió el termino
+    let regex = new RegExp(termino, 'i'); // La 'i' es para que sea  insensible a las mayusculas y minúsculas
+
+    Producto.find( { nombre: regex } )
+        .populate('categoria', 'nombre')
+        .exec( (err, productos) => {
+
+            // Error de conexión
+            if( err ) {
+                return res.status(500).json({
+                    ok: false,
+                    err
+                });
+            }
+
+            res.json({
+                ok: true,
+                productos
+            });
+
+        });
+
+});
+
+// =============================
 // Crear un nuevo producto
 // =============================
 app.post('/producto', verificaToken, (req, res) => {
