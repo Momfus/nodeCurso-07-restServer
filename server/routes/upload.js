@@ -4,6 +4,7 @@ const app = express();
 
 
 const Usuario = require('../models/usuario');
+const Producto = require('../models/producto');
 
 // Paquetes que existen por defecto en nodeJs
 const fs = require('fs');
@@ -90,7 +91,13 @@ app.put('/upload/:tipo/:id', function(req, res) { // es /upload que es la ruta, 
 
 
         // En caso de éxito al subirlo
-        imagenUsuario( id, res, nombreArchivo );
+        if( tipo === 'usuarios') {
+            imagenUsuario( id, res, nombreArchivo );
+        } else {
+
+            imagenProducto( id, res, nombreArchivo );
+
+        }
 
     });
 
@@ -151,7 +158,58 @@ function imagenUsuario( id, res, nombreArchivo ) {
 
 }
 
-function imagenProducto() {
+function imagenProducto( id, res, nombreArchivo ) {
+
+    Producto.findById( id, (err, productoDB) => {
+
+        // En caso de error de conexión
+        if( err ) {
+
+            borrarArchivo( nombreArchivo, 'productos' ); // Borra el recién subido al haber un error y no llenar el servidor de basura
+
+            return res.status(500).json({
+                ok: false,
+                err
+            });
+
+        }
+
+        // Verificar que existe el PRODUCTO
+        if( !productoDB ) {
+
+            borrarArchivo( nombreArchivo, 'productos' ); // Borra el recién subido al haber un error y no llenar el servidor de basura
+
+            return res.status(400).json({
+
+                
+                ok: false,
+                err: {
+                    message: 'Producto no existe'
+                }
+
+            });
+        }
+
+        // Verificar ruta de archivo
+        borrarArchivo( productoDB.img, 'productos' );
+
+        // Actualizar imagen del usuario
+        productoDB.img = nombreArchivo;
+
+        productoDB.save( (err, productoGuardado) => {
+
+            res.json({
+
+                ok: true,
+                producto: productoGuardado,
+                img: nombreArchivo
+
+            });
+
+        });
+
+
+    });
 
 }
 
